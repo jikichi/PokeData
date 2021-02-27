@@ -1,0 +1,6 @@
+framework module Pods_PokeData_PokeDataUITests {
+  umbrella header "Pods-PokeData-PokeDataUITests-umbrella.h"
+
+  export *
+  module * { export * }
+}
