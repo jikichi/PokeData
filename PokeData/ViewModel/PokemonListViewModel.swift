@@ -11,24 +11,6 @@ import RxRelay
 import RxCocoa
 import UIKit.UIImage
 
-class PokemonListViewModel {
-    
-    var disposeBag = DisposeBag()
-    var pokeDataObservable: Observable<[Pokemon]> {
-        return pokeDataRelay.asObservable()
-    }
-    
-    let pokeDataRelay = BehaviorRelay<[Pokemon]>(value: [])
-    
-    init(pokemons: [Pokemon]) {
-        pokeDataRelay.accept(pokemons)
-    }
-    
-    func pokemonSearchResults(results: [Pokemon]) -> Void {
-        pokeDataRelay.accept(results)
-    }
-}
-
 class PokemonSearchResultsViewModel {
     
     let searchResult: Pokemon
@@ -45,7 +27,7 @@ class PokemonSearchResultsViewModel {
         
         self.pokemonImage = Observable.just(UIImage(named: searchResult.no)!)
             .asDriver(onErrorJustReturn: UIImage())
-        self.pokemonName = Observable.just(searchResult.name)
+        self.pokemonName = Observable.just(searchResult.nameInJapanese)
             .asDriver(onErrorJustReturn: "error during fetching")
     }
     

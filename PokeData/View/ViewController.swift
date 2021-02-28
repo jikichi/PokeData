@@ -9,25 +9,6 @@ import UIKit
 import RxSwift
 import RxCocoa
 
-extension UIColor {
-    convenience init(hex: String, alpha: CGFloat = 1.0) {
-        let v = Int("000000" + hex, radix: 16) ?? 0
-        let r = CGFloat(v / Int(powf(256, 2)) % 256) / 255
-        let g = CGFloat(v / Int(powf(256, 1)) % 256) / 255
-        let b = CGFloat(v / Int(powf(256, 0)) % 256) / 255
-        self.init(red: r, green: g, blue: b, alpha: min(max(alpha, 0), 1))
-    }
-    
-    static var mainBlue = UIColor.init(hex: "03A9F4")
-    static var warning = UIColor.init(hex: "f44336")
-    static var medium = UIColor.init(hex: "1CB7FF")
-    static var row = UIColor.init(hex: "0173A8")
-    
-    static func customMainBlue(alpha: CGFloat) -> UIColor {
-        return UIColor.init(hex: "03A9F4", alpha: alpha)
-    }
-}
-
 class ViewController: UIViewController {
     
     let disposeBag = DisposeBag()
@@ -114,39 +95,29 @@ extension ViewController {
         
         let API = PokemonAPI()
         
-        
-        _ = searchController.searchBar.rx.incrementalText
+        let pokemonListObservable = searchController.searchBar.rx.incrementalText
             .flatMap { text -> Observable<[Pokemon]> in
-                guard let text = text else { return .just(API.getPokemonList())}
+                guard let text = text else { return .just([])}
+                if text == "" { return .just(API.getPokemonList())}
                 return API.getSearchResults(text)
             }
+        
+        pokemonListObservable
             .bind(to: collectionView.rx.items(dataSource: self.dataSource))
             .disposed(by: disposeBag)
         
-//        _ = searchController.searchBar.rx.text.orEmpty
-//            .asDriver()
-//            .debounce(.milliseconds(500))
-//            .distinctUntilChanged()
-//            .flatMapLatest { query in
-//                API.getSearchResults(query)
-//                    .startWith([])
-//                    .asDriver(onErrorJustReturn: [])
-//            }
-//            .asDriver(onErrorJustReturn: [])
-//            .map { pokemons -> [PokemonSearchResultsViewModel] in
-//                if pokemons.count != 0 {
-//                    return pokemons.map(PokemonSearchResultsViewModel.init)
-//                } else {
-//                    return API.getPokemonListByEnglish().map(PokemonSearchResultsViewModel.init)
-//                }
-//            }
-//            .drive(collectionView.rx.items(cellIdentifier: NSStringFromClass(PokemonSearchResultsCollectionViewCell.self), cellType: PokemonSearchResultsCollectionViewCell.self)) { (_, viewModel, cell) in
-//                cell.viewModel = viewModel
-//            }
-//            .disposed(by: disposeBag)
+        collectionView.rx.itemSelected
+            .asDriver()
+            .drive(onNext: { [weak self] indexPath in
+                let pokemonObservable = pokemonListObservable.flatMap { pokemon -> Observable<Pokemon> in
+                    return .just(pokemon[indexPath.row])
+                }
+                let nextViewController = PokemonDetailViewController(viewModel: PokemonDetailViewModel(pokemonObservable: pokemonObservable))
+                self?.navigationController?.pushViewController(nextViewController, animated: true)
+            })
     }
     
-    func configureKeyboardDismissesOnScroll() {
+    private func configureKeyboardDismissesOnScroll() {
         let searchBar = self.searchController.searchBar
         
         collectionView.rx.contentOffset
@@ -164,32 +135,6 @@ extension ViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         
         return true
-    }
-}
-
-final class PokemonDataSource: NSObject, UICollectionViewDataSource, RxCollectionViewDataSourceType {
-    
-    typealias Element = [Pokemon]
-    
-    private var items: Element = []
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: NSStringFromClass(PokemonSearchResultsCollectionViewCell.self), for: indexPath) as! PokemonSearchResultsCollectionViewCell
-        cell.viewModel = PokemonSearchResultsViewModel(searchResult: items[indexPath.row])
-        return cell
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return items.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, observedEvent: Event<Element>) {
-        Binder(self) { dataSource, items in
-            if dataSource.items == items { return }
-            dataSource.items = items
-            collectionView.reloadData()
-        }
-        .on(observedEvent)
     }
 }
 

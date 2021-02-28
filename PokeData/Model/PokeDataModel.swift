@@ -26,10 +26,13 @@ class PokemonAPI {
         
         let pokemonList = (json?.map { pokemon -> Pokemon in
             let no: String = pokemon.1["id"].stringValue
-            let name: String = pokemon.1["name"]["japanese"].stringValue
+            let nameInJapanese: String = pokemon.1["name"]["japanese"].stringValue
+            let nameInEnglish: String = pokemon.1["name"]["english"].stringValue
+            let nameInChinese: String = pokemon.1["name"]["chinese"].stringValue
+            let nameInFrench: String = pokemon.1["name"]["french"].stringValue
             let type: [String] = pokemon.1["type"].arrayObject as! [String]
             let stats: [String : Int] = pokemon.1["base"].dictionaryObject as! [String : Int]
-            return Pokemon.init(no: no, name: name, type: type, stats: stats)
+            return Pokemon.init(no: no, nameInJapanese: nameInJapanese, nameInEnglish: nameInEnglish, nameInChinese: nameInChinese, nameInFrench: nameInFrench, type: type, stats: stats)
         })!
         
         return pokemonList
@@ -41,10 +44,13 @@ class PokemonAPI {
         
         let pokemonList = (json?.map { pokemon -> Pokemon in
             let no: String = pokemon.1["id"].stringValue
-            let name: String = pokemon.1["name"]["english"].stringValue
+            let nameInJapanese: String = pokemon.1["name"]["japanese"].stringValue
+            let nameInEnglish: String = pokemon.1["name"]["english"].stringValue
+            let nameInChinese: String = pokemon.1["name"]["chinese"].stringValue
+            let nameInFrench: String = pokemon.1["name"]["french"].stringValue
             let type: [String] = pokemon.1["type"].arrayObject as! [String]
             let stats: [String : Int] = pokemon.1["base"].dictionaryObject as! [String : Int]
-            return Pokemon.init(no: no, name: name, type: type, stats: stats)
+            return Pokemon.init(no: no, nameInJapanese: nameInJapanese, nameInEnglish: nameInEnglish, nameInChinese: nameInChinese, nameInFrench: nameInFrench, type: type, stats: stats)
         })!
         
         return pokemonList
@@ -60,19 +66,33 @@ class PokemonAPI {
     }
     
     func getSearchResults(_ query: String) -> Observable<[Pokemon]> {
-        let results: [Pokemon] = pokemons.filter { $0.name.contains(query.hiraganaToKatakana()) }
-        return Observable.just(results)
+        let resultsInJapanese: [Pokemon] = pokemons.filter { $0.nameInJapanese.contains(query.hiraganaToKatakana())
+        }
+//        let resultsInEnglish: [Pokemon] = pokemons.filter {
+//            $0.nameInEnglish.contains(query.lowercased()) }
+//        let resultsInChinese: [Pokemon] =
+//            pokemons.filter { $0.nameInChinese.contains(query) }
+//        let resultsInFrench: [Pokemon] = pokemons.filter { $0.nameInFrench.contains(query.lowercased()) }
+//
+//        let results: [Pokemon] = resultsInJapanese + resultsInEnglish + resultsInFrench + resultsInChinese
+        
+
+        
+        return Observable.just(resultsInJapanese)
     }
     
-    func getSearchResultsByEnglish(_ query: String) -> Observable<[Pokemon]> {
-        let results: [Pokemon] = pokemons.filter { $0.name.lowercased().contains(query) }
-        return Observable.just(results)
-    }
+//    func getSearchResultsByEnglish(_ query: String) -> Observable<[Pokemon]> {
+//        let results: [Pokemon] = pokemons.filter { $0.name.lowercased().contains(query) }
+//        return Observable.just(results)
+//    }
 }
 
-struct Pokemon: Equatable {
+struct Pokemon: Hashable {
     let no: String
-    let name: String
+    let nameInJapanese: String
+    let nameInEnglish: String
+    let nameInChinese: String
+    let nameInFrench: String
     let type: [String]
     let stats: [String : Int]
 }

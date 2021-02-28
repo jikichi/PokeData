@@ -92,10 +92,4 @@ class PokemonSearchResultsCollectionViewCell: UICollectionViewCell {
             pokemonImageView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
         ])
     }
-    
-    
-}
-
-extension PokemonSearchResultsCollectionViewCell: ReusableView {
-    
 }
