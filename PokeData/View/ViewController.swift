@@ -114,7 +114,7 @@ extension ViewController {
                 }
                 let nextViewController = PokemonDetailViewController(viewModel: PokemonDetailViewModel(pokemonObservable: pokemonObservable))
                 self?.navigationController?.pushViewController(nextViewController, animated: true)
-            })
+            }).disposed(by: disposeBag)
     }
     
     private func configureKeyboardDismissesOnScroll() {

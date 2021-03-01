@@ -95,6 +95,27 @@ struct Pokemon: Hashable {
     let nameInFrench: String
     let type: [String]
     let stats: [String : Int]
+    
+    enum PokemonType: String {
+        case grass
+        case poison
+        case fire
+        case flying
+        case water
+        case bug
+        case normal
+        case electric
+        case ice
+        case fighting
+        case ground
+        case psychic
+        case rock
+        case ghost
+        case dragon
+        case dark
+        case steel
+        case fairy
+    }
 }
 
 extension String {
